@@ -1,16 +1,20 @@
 import sys
-sys.path.append(r'D:\Dev Tools\FreeCAD\FreeCAD_0.19.22670-Win-Conda_vc14.x-x86_64\lib')
-sys.path.append(r'D:\Dev Tools\FreeCAD\FreeCAD_0.19.22670-Win-Conda_vc14.x-x86_64\bin')
-sys.path.append(r'D:\Dev Tools\FreeCAD\FreeCAD_0.19.22670-Win-Conda_vc14.x-x86_64\bin\Lib\site-packages')
-print((r'D:\Program Files\FreeCAD 0.18\bin'))
+import importDXF, os, tempfile, subprocess, sys, shutil , dotenv
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
+# sys.path.append(os.environ.get('FREECAD_LIB'))
+# sys.path.append(os.environ.get('FREECAD_BIN'))
+# sys.path.append(r'D:\Dev Tools\FreeCAD\FreeCAD_0.19.22670-Win-Conda_vc14.x-x86_64\bin\Lib\site-packages')
 import six
 import FreeCAD as app
 import FreeCADGui as gui
 from FreeCAD import Console as FCC
 
-import importDXF, os, tempfile, subprocess, sys, shutil , dotenv
-from os.path import join, dirname
-from dotenv import load_dotenv
+
 from datetime import datetime
 
 
@@ -224,24 +228,8 @@ def convertToDwg(dxffilename, dwgfilename):
 
 
 tmp_folder = tempfile.mkdtemp()
-print("tmp_folder = " + tmp_folder)
 
 
-# convertToDxf(r"E:\Workspace\Python Projects\DWG_to_PDF_python\dwg\visualization_-_conference_room.dwg")
-
-# print(tmp_folder + r"\visualization_-_conference_room.dxf")
-# importDXF.open(tmp_folder + r"\visualization_-_conference_room.dxf")
-
-# document = list(app.listDocuments().keys())[0]
-# app.setActiveDocument(document)
-# app.ActiveDocument=app.getDocument(document)
-
-# gui.export(app.ActiveDocument.Objects, r"d:\new-5.pdf")
-
-
-
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
 
 results_folder = os.environ.get('RESULTS_FOLDER')
 search_folders = os.environ.get('SEARCH_FOLDERS').split('";"')
@@ -249,26 +237,20 @@ search_folders[0] = search_folders[0][1:]
 search_folders[-1] = search_folders[-1][:-1]
 last_date = os.environ.get('LAST_DATE')
 pre_tmp_folder = os.environ.get('PRE_TMP_FOLDER')
-print("pre_tmp_folder = " + pre_tmp_folder)
-if os.path.isdir(pre_tmp_folder):
-    print("exist")
-    os.remove(pre_tmp_folder) 
+# if os.path.isdir(pre_tmp_folder):
+#     os.remove(pre_tmp_folder) 
 
 document_index = 0
 for search_folder in search_folders:
-    print(search_folder)
     for root, dirs, files in os.walk(search_folder): 
         for file in files:     
             if file.endswith('.dwg'):                 
-                print(file)
                 try:
                     file_path = root + "\\" + file
                     mtime = os.path.getctime(file_path)
                     last_modified_date = datetime.fromtimestamp(mtime)
                     if last_modified_date > datetime.strptime(last_date, '%Y-%m-%d %H:%M:%S'):
                         convertToDxf(file_path)
-                        print("in: " + file_path)
-                        print("out: " + tmp_folder + "\\" + file[:-3] + "dxf")
                         importDXF.open(tmp_folder + "\\" + file[:-3] + "dxf")                        
                         document = list(app.listDocuments().keys())[document_index]
                         document_index += 1
@@ -278,6 +260,6 @@ for search_folder in search_folders:
                         gui.export(app.ActiveDocument.Objects, results_folder + "\\" + file[:-3] + "pdf")
                 except OSError:                    
                     mtime = 0
-tmp_folder = tmp_folder.replace("\\", "\\\\")
+# tmp_folder = tmp_folder.replace("\\", "\\\\")
 dotenv.set_key(dotenv_path, "LAST_DATE", str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 dotenv.set_key(dotenv_path, "PRE_TMP_FOLDER", tmp_folder)
