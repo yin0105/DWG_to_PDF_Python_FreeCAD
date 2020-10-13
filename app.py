@@ -107,7 +107,7 @@ def getTeighaConverter():
         The full path of the converter executable
         '/usr/bin/TeighaFileConverter'
     """
-    return r"D:\Program Files\ODA\ODAFileConverter_title 21.9.0\ODAFileConverter.exe"
+    return oda_path #r"D:\Program Files\ODA\ODAFileConverter_title 21.9.0\ODAFileConverter.exe"
     import FreeCAD, os, platform
     p = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Draft")
     p = p.GetString("TeighaFileConverter")
@@ -227,18 +227,13 @@ def convertToDwg(dxffilename, dwgfilename):
     return None
 
 
-tmp_folder = tempfile.mkdtemp()
-
-
-
+tmp_folder = os.environ.get('TEMP_FOLDER')
 results_folder = os.environ.get('RESULTS_FOLDER')
 search_folders = os.environ.get('SEARCH_FOLDERS').split('";"')
 search_folders[0] = search_folders[0][1:]
 search_folders[-1] = search_folders[-1][:-1]
 last_date = os.environ.get('LAST_DATE')
-pre_tmp_folder = os.environ.get('PRE_TMP_FOLDER')
-# if os.path.isdir(pre_tmp_folder):
-#     os.remove(pre_tmp_folder) 
+oda_path = os.environ.get('ODA_PATH')
 
 document_index = 0
 for search_folder in search_folders:
@@ -260,6 +255,4 @@ for search_folder in search_folders:
                         gui.export(app.ActiveDocument.Objects, results_folder + "\\" + file[:-3] + "pdf")
                 except OSError:                    
                     mtime = 0
-# tmp_folder = tmp_folder.replace("\\", "\\\\")
 dotenv.set_key(dotenv_path, "LAST_DATE", str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
-dotenv.set_key(dotenv_path, "PRE_TMP_FOLDER", tmp_folder)
